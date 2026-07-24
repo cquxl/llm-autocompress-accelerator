@@ -31,3 +31,24 @@ def test_missing_quant_dependency_is_explained():
     runnable, reasons = assess(capability, model, env)
     assert not runnable
     assert "python module llmcompressor is missing" in reasons
+
+
+def test_cusparselt_requires_samoyeds_native_extension():
+    model = inspect_model(DEFAULT_WEIGHTS_ROOT / "opt-125m")
+    capability = next(
+        item
+        for item in matching_capabilities(["wanda_2_4"], ["cusparselt"])
+        if item.method == "wanda_2_4"
+    )
+    env = {
+        "gpus": [{"compute_capability": "8.9"}],
+        "modules": {
+            "torch": {"available": True},
+            "transformers": {"available": True},
+        },
+        "repos": {"d2prune": {"markers_valid": True}},
+        "extensions": {"samoyeds_cusparselt": {"available": False}},
+    }
+    runnable, reasons = assess(capability, model, env)
+    assert not runnable
+    assert any("cusparselt24_kernel" in reason for reason in reasons)

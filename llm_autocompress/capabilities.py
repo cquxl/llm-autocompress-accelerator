@@ -264,6 +264,13 @@ def assess(
             reasons.append(
                 "Samoyeds extension is unavailable or ABI-incompatible with this PyTorch"
             )
+    if capability.backend == "cusparselt":
+        extension = env.get("extensions", {}).get("samoyeds_cusparselt", {})
+        if not extension.get("available"):
+            reasons.append(
+                "Samoyeds cusparselt24_kernel is unavailable or ABI-incompatible; "
+                "the PyTorch private cuSPARSELt operator is not an allowed fallback"
+            )
     required_cc = capability.min_compute_capability
     current_cc = _compute_capability(env)
     if required_cc is not None:

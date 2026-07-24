@@ -41,9 +41,21 @@ def test_microbenchmark_is_never_recommended(tmp_path: Path):
     )
     write_json(
         tmp_path / "benchmarks" / "wanda_2_4__cusparselt.json",
-        {"status": "completed", "records": [{"same_backend_speedup": 2.0}]},
+        {
+            "status": "completed",
+            "implementation": "samoyeds_cusparselt24_kernel",
+            "kernel_source": "native/samoyeds_cusparselt/cusparselt24_mod.cu",
+            "uses_torch_private_cslt": False,
+            "records": [{"same_backend_speedup": 2.0}],
+        },
     )
     evaluation = evaluate_run(tmp_path, request, plan)
     assert evaluation["recommended"] is None
+    assert (
+        evaluation["evaluated"][0]["kernel_implementation"]
+        == "samoyeds_cusparselt24_kernel"
+    )
+    assert evaluation["evaluated"][0]["uses_torch_private_cslt"] is False
     report = render_report(request, plan, evaluation, {"gpus": []})
     assert "microbenchmarks" in report
+    assert "samoyeds_cusparselt24_kernel" in report

@@ -14,6 +14,9 @@ dependencies = [
 [project.optional-dependencies]
 runtime = [
   "datasets>=2.14,<3",
+  "ninja>=1.11,<2",
+  "nvidia-cusparselt-cu12==0.7.1",
+  "pybind11>=2.13,<3",
   "safetensors>=0.4",
   "transformers>=4.56,<5",
 ]

@@ -119,6 +119,19 @@ def main() -> int:
                     "-n",
                     args.runtime_env,
                     "python",
+                    str(ROOT / "scripts" / "build_samoyeds_cusparselt.py"),
+                    "--output-dir",
+                    str(destination / "samoyeds-cusparselt"),
+                    "--yes",
+                ]
+            )
+            run(
+                [
+                    "conda",
+                    "run",
+                    "-n",
+                    args.runtime_env,
+                    "python",
                     "-m",
                     "pip",
                     "install",

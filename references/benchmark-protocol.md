@@ -3,6 +3,9 @@
 - Full: batch 1/8, input 128/512/2048, output 32/128, 10 warmups, 30 iterations.
 - Smoke: first shape, up to 2 warmups and 5 iterations; record actual counts.
 - Synchronize CUDA around timings; kernel paths use CUDA events.
+- For cuSPARSELt, record the Samoyeds extension path/source hash, one-time
+  compression/search cost, padded token count, numerical error, and steady-state
+  latency. Reject results produced by PyTorch's private cuSPARSELt operator.
 - Report checkpoint bytes, compression ratio, peak VRAM, PPL, TTFT, prefill tokens/s,
   TPOT, decode tokens/s, request throughput and end-to-end latency when exposed.
 - Default quality gate: relative WikiText2 PPL increase no more than 5%.

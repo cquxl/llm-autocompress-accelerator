@@ -63,6 +63,19 @@ def _micro_speedup(result: dict[str, Any]) -> float | None:
     return statistics.median(values) if values else None
 
 
+def _kernel_provenance(result: dict[str, Any]) -> dict[str, Any]:
+    value = result
+    nested = result.get("cusparselt")
+    if isinstance(nested, dict):
+        value = nested
+    return {
+        "kernel_implementation": value.get("implementation"),
+        "kernel_source": value.get("kernel_source"),
+        "kernel_extension_path": value.get("extension_path"),
+        "uses_torch_private_cslt": value.get("uses_torch_private_cslt"),
+    }
+
+
 def evaluate_run(
     run_dir: Path,
     request: CompressionRequest,
@@ -171,6 +184,7 @@ def evaluate_run(
             and same_backend_speedup
             >= request.constraints.min_same_backend_speedup
         )
+        kernel_provenance = _kernel_provenance(result)
         evaluated.append(
             {
                 **candidate,
@@ -192,6 +206,7 @@ def evaluate_run(
                 "same_backend_speedup": same_backend_speedup,
                 "deployment_speedup": deployment_speedup,
                 "micro_kernel_speedup": _micro_speedup(result),
+                **kernel_provenance,
                 "peak_vram_bytes": summary.get("peak_vram_bytes"),
                 "benchmark_summary": summary,
                 "source_bytes": source_bytes,
@@ -290,7 +305,7 @@ def render_report(
         rows.append(
             "| {id} | {algorithm} | {structure} | {backend} | {scope} | {status} | "
             "{artifact} | {ratio} | {effective} | {sparsity} | {ppl} | {ppl_delta} | "
-            "{same} | {deploy} | {micro} | {accepted} |".format(
+            "{same} | {deploy} | {micro} | {kernel} | {accepted} |".format(
                 id=item["id"],
                 algorithm=item["algorithm"],
                 structure=item["structure"],
@@ -320,6 +335,7 @@ def render_report(
                 same=_fmt(item.get("same_backend_speedup")),
                 deploy=_fmt(item.get("deployment_speedup")),
                 micro=_fmt(item.get("micro_kernel_speedup")),
+                kernel=item.get("kernel_implementation") or "-",
                 accepted="yes" if item["accepted"] else "no",
             )
         )
@@ -422,9 +438,9 @@ Generated: {evaluation['generated_at']}
 
 ## Candidate Results
 
-| Candidate | Algorithm | Structure | Backend | Scope | Status | Artifact | Checkpoint size ratio | Effective weight compression | Sparsity | PPL | PPL Δ | Same-backend speedup | Deployment speedup | Micro/kernel speedup | Accepted |
-| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-{chr(10).join(rows) if rows else "| - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |"}
+| Candidate | Algorithm | Structure | Backend | Scope | Status | Artifact | Checkpoint size ratio | Effective weight compression | Sparsity | PPL | PPL Δ | Same-backend speedup | Deployment speedup | Micro/kernel speedup | Kernel implementation | Accepted |
+| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+{chr(10).join(rows) if rows else "| - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |"}
 
 ## Generation Samples
 
@@ -435,7 +451,8 @@ Generated: {evaluation['generated_at']}
 
 - `end_to_end` candidates may be recommended only when quality, target compression, and same-backend speed pass.
 - `linear`, `expert_moe_layer`, and `structured_checkpoint_and_linear` results are microbenchmarks and are never presented as full-model acceleration.
-- Checkpoint size ratio is source bytes / saved artifact bytes. A dense-format 2:4 HF checkpoint may remain near 1× on disk; cuSPARSELt packs it at runtime.
+- Checkpoint size ratio is source bytes / saved artifact bytes. A dense-format 2:4 HF checkpoint may remain near 1× on disk; the Samoyeds `cusparselt24_kernel` packs it at runtime with the direct cuSPARSELt C API.
+- `cusparselt` measurements are valid only when `kernel_implementation` is `samoyeds_cusparselt24_kernel` and `uses_torch_private_cslt` is false.
 - Missing metrics remain missing; no historical or synthetic value is substituted.
 
 ## Failures and Skips
@@ -471,6 +488,10 @@ def write_results_csv(path: Path, evaluation: dict[str, Any]) -> None:
         "same_backend_speedup",
         "deployment_speedup",
         "micro_kernel_speedup",
+        "kernel_implementation",
+        "kernel_source",
+        "kernel_extension_path",
+        "uses_torch_private_cslt",
         "peak_vram_bytes",
         "artifact_bytes",
         "source_bytes",

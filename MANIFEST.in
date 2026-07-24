@@ -1,1 +1,2 @@
 recursive-include third_party/d2prune_core *.py *.yaml *.yml *.json LICENSE README.md requirements.txt
+recursive-include native/samoyeds_cusparselt *.cu LICENSE README.md

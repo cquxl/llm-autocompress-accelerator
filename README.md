@@ -10,6 +10,9 @@
 仓库内已包含 D2Prune 的纯源码核心（Wanda、SparseGPT、D2Prune/ADMM、2:4、
 MoE/ROSE），不包含模型、数据、缓存或历史结果。Samoyeds 和 SpInfer 按固定
 commit 在每台 GPU 服务器上准备，Samoyeds 必须针对当前 GPU 重新编译。
+其中 2:4 的 cuSPARSELt 后端固定使用仓库内的 Samoyeds
+`cusparselt24_kernel` 原生扩展，直接调用 NVIDIA cuSPARSELt C API，不调用
+PyTorch 私有的 `_cslt_sparse_mm`，也不回退到 PyTorch CUTLASS。
 
 新 A40/L40 服务器只需从 GitHub clone 后执行一次：
 

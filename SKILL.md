@@ -65,6 +65,9 @@ The OPT demo targets reloadable compression and end-to-end quality. The DeepSeek
 
 - Reuse local weights and Arrow datasets; do not download when a local copy exists.
 - Never enable SpInfer fake sparsity. Never invent timing, PPL, or memory data.
+- For the `cusparselt` backend, use only the host-built Samoyeds
+  `cusparselt24_kernel` direct C-API extension. Never fall back to
+  `torch._cslt_sparse_mm`, PyTorch semi-structured tensors, or CUTLASS.
 - Never use magnitude pruning as a formal candidate. Use the local Wanda,
   SparseGPT, D2Prune or ROSE implementation; a layout-only mask is permitted only
   for isolated kernel validation and must be labeled as such.

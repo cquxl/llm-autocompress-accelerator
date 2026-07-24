@@ -194,6 +194,8 @@ def _quant_converter_probe(conda_envs: list[str]) -> dict[str, Any]:
 
 
 def inspect_environment() -> dict[str, Any]:
+    from .adapters.sparse import samoyeds_cusparselt_probe
+
     disk = shutil.disk_usage(SKILL_ROOT)
     gpus = _nvidia_gpus()
     nvcc = run_command(["nvcc", "--version"], timeout=15)
@@ -221,7 +223,10 @@ def inspect_environment() -> dict[str, Any]:
         },
         "libraries": _library_probe(),
         "modules": {name: import_probe(name) for name in MODULES},
-        "extensions": {"samoyeds": _samoyeds_extension_probe()},
+        "extensions": {
+            "samoyeds": _samoyeds_extension_probe(),
+            "samoyeds_cusparselt": samoyeds_cusparselt_probe(),
+        },
         "converter_envs": {"quant": _quant_converter_probe(conda_envs)},
         "conda_envs": conda_envs,
         "disk": {
@@ -277,6 +282,11 @@ def readiness_report(env: dict[str, Any]) -> dict[str, Any]:
         "samoyeds_extension": bool(
             env.get("extensions", {}).get("samoyeds", {}).get("available")
         ),
+        "samoyeds_cusparselt_extension": bool(
+            env.get("extensions", {})
+            .get("samoyeds_cusparselt", {})
+            .get("available")
+        ),
         "structured_2_4_hardware": bool(gpu.get("supports_2_4")),
     }
     return {
@@ -310,6 +320,7 @@ def readiness_report(env: dict[str, Any]) -> dict[str, Any]:
                 "gpu",
                 "runtime_torch",
                 "structured_2_4_hardware",
+                "samoyeds_cusparselt_extension",
             )
         ),
         "ready_for_samoyeds": all(

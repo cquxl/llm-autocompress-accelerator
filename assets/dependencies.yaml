@@ -82,3 +82,15 @@ python:
     compressed-tensors: 0.12.2
     torch: 2.8.0
     transformers: 4.56.2
+kernels:
+  samoyeds_cusparselt24:
+    source: native/samoyeds_cusparselt/cusparselt24_mod.cu
+    original_source: samoyeds_mod/api/cusparselt24_mod.cu
+    module: cusparselt24_kernel
+    api: CuSparseLtLinear
+    library: nvidia-cusparselt-cu12==0.7.1
+    allowed_operator: cusparseLtMatmul
+    forbidden_fallbacks:
+      - torch._cslt_sparse_mm
+      - torch.sparse.to_sparse_semi_structured
+      - PyTorch CUTLASS semi-structured fallback

@@ -33,6 +33,11 @@ On A40, the doctor identifies compute capability 8.6 and the Samoyeds build is
 compiled locally for `sm_86`. On L40, it compiles for `sm_89`. Do not copy a
 compiled extension between those architectures.
 
+`--build-samoyeds` also compiles the source-only Samoyeds
+`cusparselt24_kernel` into `<dependency_root>/samoyeds-cusparselt`. This extension
+uses the direct NVIDIA cuSPARSELt C API and is mandatory for the `cusparselt`
+backend; there is no PyTorch private-operator fallback.
+
 ## Discovery precedence
 
 Every path can be supplied by the site YAML or environment variables:
