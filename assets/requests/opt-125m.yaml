@@ -1,18 +1,18 @@
 name: opt-125m-autocompress
 model:
-  path: /data/xl/Projects/cache/llm_weights/opt-125m
+  path: ${MODEL_ROOT}/opt-125m
   family: opt
   kind: dense
   trust_remote_code: false
 methods: [awq_w4a16, gptq_w4a16, wanda_2_4]
 backends: [auto]
 calibration:
-  dataset: /data/xl/Projects/cache/data/c4
+  dataset: ${DATA_ROOT}/c4
   samples: 128
   sequence_length: 2048
   seed: 42
 evaluation:
-  dataset: /data/xl/Projects/cache/data/wikitext/wikitext-2-raw-v1
+  dataset: ${DATA_ROOT}/wikitext/wikitext-2-raw-v1
   max_tokens_smoke: 4096
   max_tokens_full: 32768
   generation_prompts: [The future of efficient language model inference is]
@@ -43,4 +43,4 @@ execution:
   tensor_parallel_size: 1
   offline: true
   timeout_seconds: 7200
-output_dir: /data/xl/Projects/Samoyeds/llm-autocompress-accelerator/runs
+output_dir: ${RUN_ROOT}

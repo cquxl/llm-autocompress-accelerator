@@ -7,12 +7,13 @@ from pathlib import Path
 
 from .business import request_mapping_from_business
 from .adapters.inference import benchmark_transformers, benchmark_vllm
-from .environment import inspect_environment
+from .environment import inspect_environment, readiness_report
 from .executor import plan_request, regenerate_report, run_request
 from .models import inspect_model
 from .schema import SKILL_ROOT, load_request, request_from_mapping
 from .utils import write_yaml
 from .utils import write_json
+from .site import load_site_config, save_site_config
 
 
 DEMO_REQUESTS = {
@@ -38,6 +39,27 @@ def _parser() -> argparse.ArgumentParser:
     inspect = commands.add_parser("inspect", help="read-only environment/model inspection")
     inspect.add_argument("--model")
     inspect.add_argument("--request")
+
+    doctor = commands.add_parser(
+        "doctor",
+        help="check whether this host can run quantization, pruning and kernels",
+    )
+
+    configure = commands.add_parser(
+        "configure-host",
+        help="write portable host paths and conda environment names",
+    )
+    configure.add_argument("--config")
+    configure.add_argument("--model-root")
+    configure.add_argument("--data-root")
+    configure.add_argument("--run-root")
+    configure.add_argument("--dependency-root")
+    configure.add_argument("--d2prune-root")
+    configure.add_argument("--spinfer-root")
+    configure.add_argument("--samoyeds-root")
+    configure.add_argument("--runtime-env")
+    configure.add_argument("--quant-env")
+    configure.add_argument("--yes", action="store_true")
 
     bootstrap = commands.add_parser(
         "bootstrap", help="convert a business description into request YAML"
@@ -87,6 +109,54 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "doctor":
+        environment = inspect_environment()
+        _json(
+            {
+                "site": load_site_config().to_dict(),
+                "environment": environment,
+                "readiness": readiness_report(environment),
+            }
+        )
+        return 0
+    if args.command == "configure-host":
+        values = {
+            "model_root": args.model_root,
+            "data_root": args.data_root,
+            "run_root": args.run_root,
+            "dependency_root": args.dependency_root,
+            "d2prune_root": args.d2prune_root,
+            "spinfer_root": args.spinfer_root,
+            "samoyeds_root": args.samoyeds_root,
+            "runtime_env": args.runtime_env,
+            "quant_env": args.quant_env,
+        }
+        preview = {
+            key: value for key, value in values.items() if value is not None
+        }
+        if not args.yes:
+            _json(
+                {
+                    "status": "dry-run",
+                    "config_path": str(
+                        Path(args.config).expanduser().resolve()
+                        if args.config
+                        else load_site_config().config_path
+                    ),
+                    "changes": preview,
+                    "message": "re-run with --yes to write host configuration",
+                }
+            )
+            return 0
+        path = save_site_config(preview, args.config)
+        _json(
+            {
+                "status": "configured",
+                "config_path": str(path),
+                "site": load_site_config(path).to_dict(),
+            }
+        )
+        return 0
     if args.command == "inspect":
         value = {"environment": inspect_environment()}
         if args.request:

@@ -7,7 +7,12 @@ description: Automate real local LLM and MoE checkpoint compression, capability-
 
 Turn an EdgeLite-style business requirement into a reproducible local compression and acceleration run. Keep compression algorithms, resulting sparsity/quantization formats, and execution kernels as three distinct layers.
 
-Use `flatquant` for serving/benchmarking. Run `scripts/setup_quant_env.sh --yes` once to create the isolated GPTQ/AWQ/SmoothQuant converter; do not install its conflicting dependencies into `flatquant`.
+On a new host, first read [host-portability.md](references/host-portability.md).
+Run `scripts/setup_host.sh` once to record host paths, create the runtime and
+isolated quantization environments, fetch pinned kernel repositories, and compile
+Samoyeds for the detected GPU. The repository already includes the source-only
+D2Prune core used for Wanda, SparseGPT, D2Prune, 2:4, and ROSE; never require the
+original server's absolute D2Prune path.
 
 ## Workflow
 
@@ -15,7 +20,7 @@ Use `flatquant` for serving/benchmarking. Run `scripts/setup_quant_env.sh --yes`
    quality, effective-compression and same-backend speed requirements:
 
    ```bash
-   conda run -n flatquant llm-autopilot bootstrap \
+   conda run -n llm-autocompress-runtime llm-autopilot bootstrap \
      --model opt-125m --prompt "权重压缩4倍，PPL增幅不超过20%，吞吐不低于Dense" \
      --output /tmp/opt-request.yaml
    ```
@@ -23,8 +28,9 @@ Use `flatquant` for serving/benchmarking. Run `scripts/setup_quant_env.sh --yes`
 2. Inspect without modifying models:
 
    ```bash
-   conda run -n flatquant llm-autopilot inspect --request /tmp/opt-request.yaml
-   conda run -n flatquant llm-autopilot plan --request /tmp/opt-request.yaml
+   conda run -n llm-autocompress-runtime llm-autopilot doctor
+   conda run -n llm-autocompress-runtime llm-autopilot inspect --request /tmp/opt-request.yaml
+   conda run -n llm-autocompress-runtime llm-autopilot plan --request /tmp/opt-request.yaml
    ```
 
 3. Read [compression-methods.md](references/compression-methods.md) and
@@ -36,7 +42,7 @@ Use `flatquant` for serving/benchmarking. Run `scripts/setup_quant_env.sh --yes`
 4. Execute only after explicit approval:
 
    ```bash
-   conda run -n flatquant llm-autopilot run \
+   conda run -n llm-autocompress-runtime llm-autopilot run \
      --request /tmp/opt-request.yaml --mode smoke --yes
    ```
 
@@ -48,9 +54,9 @@ Use `flatquant` for serving/benchmarking. Run `scripts/setup_quant_env.sh --yes`
 ## Built-in demos
 
 ```bash
-conda run -n flatquant llm-autopilot demo opt-125m --mode smoke --yes
-conda run -n flatquant llm-autopilot demo deepseek-v2-lite --mode smoke --yes
-conda run -n flatquant llm-autopilot serve --host 127.0.0.1 --port 7860
+conda run -n llm-autocompress-runtime llm-autopilot demo opt-125m --mode smoke --yes
+conda run -n llm-autocompress-runtime llm-autopilot demo deepseek-v2-lite --mode smoke --yes
+conda run -n llm-autocompress-runtime llm-autopilot serve --host 127.0.0.1 --port 7860
 ```
 
 The OPT demo targets reloadable compression and end-to-end quality. The DeepSeek demo loads real checkpoint tensors and activations for expert/kernel evidence; it must not claim compressed end-to-end generation until that path is implemented and verified.
@@ -63,6 +69,7 @@ The OPT demo targets reloadable compression and end-to-end quality. The DeepSeek
   SparseGPT, D2Prune or ROSE implementation; a layout-only mask is permitted only
   for isolated kernel validation and must be labeled as such.
 - Record skipped/failed candidates and continue.
-- Preserve existing Samoyeds, D2Prune and SpInfer repositories; write only under the run directory.
+- Preserve existing Samoyeds, D2Prune and SpInfer repositories; write compatibility
+  copies only under the run directory.
 - Require `--yes` for installs, compilation, conversion, and model writes.
 - Use [request-schema.md](references/request-schema.md) when editing requests manually.

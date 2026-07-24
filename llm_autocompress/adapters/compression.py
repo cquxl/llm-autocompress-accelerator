@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ..models import ModelInfo
-from ..schema import CompressionRequest
+from ..schema import SPINFER_ROOT, CompressionRequest
 from ..utils import (
     directory_size,
     model_fingerprint,
@@ -225,10 +225,25 @@ def compress_with_llmcompressor(
     output_dir.mkdir(parents=True, exist_ok=True)
     write_json(manifest_path, manifest)
     try:
+        import compressed_tensors
+        import llmcompressor
         import torch
+        import transformers
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         oneshot = _symbol(["llmcompressor"], "oneshot")
+        manifest["software"].update(
+            {
+                "implementation": "llmcompressor",
+                "llmcompressor": getattr(llmcompressor, "__version__", "unknown"),
+                "compressed_tensors": getattr(
+                    compressed_tensors, "__version__", "unknown"
+                ),
+                "torch": torch.__version__,
+                "transformers": transformers.__version__,
+            }
+        )
+        write_json(manifest_path, manifest)
         source = model.resolved_path
         tokenizer = AutoTokenizer.from_pretrained(
             source,
@@ -300,7 +315,7 @@ def compress_with_llmcompressor(
 def prepare_spinfer_phase2_script(destination: Path) -> dict[str, Any]:
     """Copy SpInfer's converter and disable its explicit fake-sparsity switch."""
     source = (
-        Path("/data/xl/Projects/SpInfer")
+        SPINFER_ROOT
         / "end2end_inference"
         / "ft_tools"
         / "huggingface_opt_convert_Phase2.py"

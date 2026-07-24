@@ -1,0 +1,84 @@
+schema_version: 1
+repositories:
+  wanda:
+    url: https://github.com/locuslab/wanda.git
+    revision: 8e8fc87b4a2f9955baa7e76e64d5fce7fa8724a6
+    directory: Wanda
+    recursive: false
+    install_default: false
+    role: paper_reference_and_optional_native_adapter
+    markers: [main.py, lib/prune.py, LICENSE]
+  sparsegpt:
+    url: https://github.com/IST-DASLab/sparsegpt.git
+    revision: 147d2159dc4f3e9f73e47b32c04d7b3708f44436
+    directory: SparseGPT
+    recursive: false
+    install_default: false
+    role: paper_reference_and_optional_native_adapter
+    markers: [sparsegpt.py, opt.py, LICENSE]
+  gptq:
+    url: https://github.com/IST-DASLab/gptq.git
+    revision: 2d65066eeb06a5c9ff5184d8cebdf33662c67faf
+    directory: GPTQ
+    recursive: false
+    install_default: false
+    role: paper_reference
+    markers: [gptq.py, quant.py, LICENSE]
+  awq:
+    url: https://github.com/mit-han-lab/llm-awq.git
+    revision: d6e797a42b9ef7778de8ee2352116e0f48a78d61
+    directory: llm-awq
+    recursive: false
+    install_default: false
+    role: paper_reference_and_optional_native_kernel
+    markers: [awq, awq/kernels, LICENSE]
+  smoothquant:
+    url: https://github.com/mit-han-lab/smoothquant.git
+    revision: c61476d728e42ae0d8a35e7e78494edcac3237b5
+    directory: SmoothQuant
+    recursive: false
+    install_default: false
+    role: paper_reference
+    markers: [smoothquant, smoothquant/ppl_eval.py, LICENSE]
+  llm_compressor:
+    url: https://github.com/vllm-project/llm-compressor.git
+    revision: e531e9296bb7bf673100d27d1b05be809713db4e
+    directory: llm-compressor
+    recursive: false
+    install_default: false
+    role: unified_quantization_adapter_source
+    markers: [src/llmcompressor, examples, LICENSE]
+  samoyeds:
+    url: https://github.com/guqiqi/Samoyeds.git
+    revision: 0888380e2817856135ffda9fd11176432025609d
+    directory: Samoyeds
+    recursive: true
+    install_default: true
+    markers: [setup.py, Samoyeds-Kernel, module]
+    build: conda run -n ${RUNTIME_ENV} python -m pip install -v .
+  spinfer:
+    url: https://github.com/HPMLL/SpInfer_EuroSys25.git
+    revision: 2410ef77998c90a9fa7eea88274b497141230e91
+    directory: SpInfer
+    recursive: true
+    install_default: true
+    markers: [README.md, end2end_inference/ft_tools]
+  d2prune:
+    url:
+    revision:
+    directory: d2prune_core
+    bundled: third_party/d2prune_core
+    recursive: false
+    install_default: false
+    role: bundled_pruning_adapter
+    markers: [main.py, cfg/args.py, prune/wanda, prune/sparsegpt]
+python:
+  runtime:
+    vllm: 0.13.0
+    torch: 2.9.0
+    transformers: 4.57.6
+  quant:
+    llmcompressor: 0.8.1
+    compressed-tensors: 0.12.2
+    torch: 2.8.0
+    transformers: 4.56.2

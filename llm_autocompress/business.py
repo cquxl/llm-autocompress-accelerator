@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .schema import DEFAULT_DATA_ROOT, DEFAULT_WEIGHTS_ROOT, SKILL_ROOT
+from .schema import DEFAULT_DATA_ROOT, DEFAULT_WEIGHTS_ROOT, SITE_CONFIG
 
 
 MODEL_ALIASES = {
@@ -134,7 +134,7 @@ def request_mapping_from_business(
             "tensor_parallel_size": 1,
             "offline": True,
         },
-        "output_dir": output_dir or str(SKILL_ROOT / "runs"),
+        "output_dir": output_dir or str(SITE_CONFIG.run_root),
         "business_request": prompt,
     }
 

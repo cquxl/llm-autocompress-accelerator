@@ -13,7 +13,7 @@ for arg in "$@"; do
 done
 
 SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CODEX_ROOT="${CODEX_HOME:-/data/xl/.codex}"
+CODEX_ROOT="${CODEX_HOME:-${HOME}/.codex}"
 TARGET="${CODEX_ROOT}/skills/llm-autocompress-accelerator"
 echo "Mode: ${MODE}"
 echo "Source: ${SOURCE}"

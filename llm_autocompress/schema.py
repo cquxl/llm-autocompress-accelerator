@@ -4,14 +4,18 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .site import expand_site_tokens, load_site_config
 from .utils import load_mapping
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-SAMOYEDS_ROOT = SKILL_ROOT.parent
-PROJECTS_ROOT = SAMOYEDS_ROOT.parent
-DEFAULT_WEIGHTS_ROOT = PROJECTS_ROOT / "cache" / "llm_weights"
-DEFAULT_DATA_ROOT = PROJECTS_ROOT / "cache" / "data"
+SITE_CONFIG = load_site_config()
+SAMOYEDS_ROOT = SITE_CONFIG.samoyeds_root
+PROJECTS_ROOT = SITE_CONFIG.dependency_root
+D2PRUNE_ROOT = SITE_CONFIG.d2prune_root
+SPINFER_ROOT = SITE_CONFIG.spinfer_root
+DEFAULT_WEIGHTS_ROOT = SITE_CONFIG.model_root
+DEFAULT_DATA_ROOT = SITE_CONFIG.data_root
 
 KNOWN_METHODS = {
     "dense",
@@ -153,7 +157,7 @@ class CompressionRequest:
         ]
     )
     backends: list[str] = field(default_factory=lambda: ["auto"])
-    output_dir: str = str(SKILL_ROOT / "runs")
+    output_dir: str = str(SITE_CONFIG.run_root)
 
     def validate(self, *, require_model: bool = True) -> None:
         if require_model and not Path(self.model.path).expanduser().exists():
@@ -201,6 +205,7 @@ class CompressionRequest:
 
 
 def request_from_mapping(data: dict[str, Any]) -> CompressionRequest:
+    data = expand_site_tokens(data)
     model_data = data.get("model")
     if isinstance(model_data, str):
         model_data = {"path": model_data}
@@ -312,7 +317,7 @@ def request_from_mapping(data: dict[str, Any]) -> CompressionRequest:
         ),
         methods=[str(item) for item in _list(data.get("methods"), CompressionRequest.__dataclass_fields__["methods"].default_factory())],
         backends=[str(item) for item in _list(data.get("backends"), ["auto"])],
-        output_dir=str(data.get("output_dir", SKILL_ROOT / "runs")),
+        output_dir=str(data.get("output_dir", SITE_CONFIG.run_root)),
     )
     request.validate()
     return request

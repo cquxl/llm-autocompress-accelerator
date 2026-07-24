@@ -1,0 +1,13 @@
+# Copy to ~/.config/llm-autocompress/site.yaml or create it with
+# `llm-autopilot configure-host ... --yes`.
+model_root: /models/llm_weights
+data_root: /datasets/llm
+run_root: /workspace/llm-autocompress-runs
+dependency_root: /workspace/llm-compression-dependencies
+# Omit d2prune_root to use the source-only core bundled in this repository.
+# Set it only when intentionally testing another D2Prune checkout.
+# d2prune_root: /workspace/D2Prune
+spinfer_root: /workspace/llm-compression-dependencies/SpInfer
+samoyeds_root: /workspace/llm-compression-dependencies/Samoyeds
+runtime_env: llm-autocompress-runtime
+quant_env: llm-autocompress-quant

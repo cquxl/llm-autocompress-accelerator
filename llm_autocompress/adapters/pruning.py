@@ -8,17 +8,15 @@ from pathlib import Path
 from typing import Any
 
 from ..models import ModelInfo
-from ..schema import PROJECTS_ROOT, CompressionRequest
+from ..schema import D2PRUNE_ROOT, CompressionRequest
 from ..utils import (
     directory_size,
     model_fingerprint,
     run_command,
+    source_tree_fingerprint,
     utc_now,
     write_json,
 )
-
-
-D2PRUNE_ROOT = PROJECTS_ROOT / "D2Prune"
 
 
 def prepare_d2prune_worktree(output_dir: Path) -> tuple[Path, list[str]]:
@@ -165,6 +163,11 @@ def run_d2prune(
         "output_dir": str(output_dir),
         "synthetic_weights": False,
         "repo": str(D2PRUNE_ROOT),
+        "repo_fingerprint_sha256": source_tree_fingerprint(D2PRUNE_ROOT),
+        "bundled_source": (
+            D2PRUNE_ROOT.resolve()
+            == (Path(__file__).resolve().parents[2] / "third_party" / "d2prune_core").resolve()
+        ),
     }
     write_json(manifest_path, manifest)
     try:

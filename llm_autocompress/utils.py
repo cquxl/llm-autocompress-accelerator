@@ -168,6 +168,51 @@ def model_fingerprint(path: Path) -> str:
     return digest.hexdigest()
 
 
+def source_tree_fingerprint(path: Path) -> str:
+    """Hash distributable source content without depending on Git metadata."""
+    digest = hashlib.sha256()
+    source_suffixes = {
+        ".c",
+        ".cc",
+        ".cpp",
+        ".cu",
+        ".cuh",
+        ".h",
+        ".hpp",
+        ".json",
+        ".md",
+        ".py",
+        ".sh",
+        ".txt",
+        ".yaml",
+        ".yml",
+    }
+    ignored_parts = {
+        ".git",
+        "__pycache__",
+        "artifacts",
+        "cache",
+        "checkpoints",
+        "logs",
+        "out",
+        "output",
+        "runs",
+        "weights",
+    }
+    for item in sorted(candidate for candidate in path.rglob("*") if candidate.is_file()):
+        relative = item.relative_to(path)
+        if any(part in ignored_parts for part in relative.parts):
+            continue
+        if item.suffix.lower() not in source_suffixes:
+            continue
+        digest.update(relative.as_posix().encode())
+        size = item.stat().st_size
+        digest.update(str(size).encode())
+        if size <= 4 * 1024 * 1024:
+            digest.update(item.read_bytes())
+    return digest.hexdigest()
+
+
 def copy_metadata_files(source: Path, destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     patterns = (
@@ -190,4 +235,3 @@ def ensure_within(path: Path, roots: Iterable[Path], *, label: str) -> Path:
         allowed = ", ".join(str(root) for root in resolved_roots)
         raise ValueError(f"{label} must be under one of: {allowed}; got {resolved}")
     return resolved
-

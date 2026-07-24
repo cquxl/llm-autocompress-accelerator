@@ -162,7 +162,14 @@ def benchmark_samoyeds_real_weight(
     try:
         import torch
 
-        extension_dir = SAMOYEDS_ROOT / "build" / "lib.linux-x86_64-cpython-310"
+        extension_candidates = sorted(
+            (SAMOYEDS_ROOT / "build").glob("lib.*")
+        )
+        extension_dir = (
+            extension_candidates[-1]
+            if extension_candidates
+            else SAMOYEDS_ROOT / "build"
+        )
         for path in (str(extension_dir), str(SAMOYEDS_ROOT)):
             if path not in sys.path:
                 sys.path.insert(0, path)

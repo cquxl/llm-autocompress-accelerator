@@ -26,7 +26,7 @@ from .environment import inspect_environment
 from .models import ModelInfo, inspect_model
 from .planner import build_plan
 from .reporting import evaluate_run, render_report, summarize_benchmark, write_results_csv
-from .schema import CompressionRequest, SKILL_ROOT, load_request
+from .schema import CompressionRequest, SITE_CONFIG, SKILL_ROOT, load_request
 from .schema import request_from_mapping
 from .utils import (
     atomic_write_text,
@@ -97,7 +97,7 @@ def create_run_dir(request: CompressionRequest, explicit: Path | None = None) ->
     root = Path(request.output_dir).expanduser().resolve()
     run_dir = explicit.resolve() if explicit else root / run_id(request.name)
     if not request.execution.allow_external_output:
-        safe_root = (SKILL_ROOT / "runs").resolve()
+        safe_root = SITE_CONFIG.run_root.resolve()
         if run_dir != safe_root and safe_root not in run_dir.parents:
             raise ValueError(
                 f"output must stay below {safe_root}; set "
@@ -307,7 +307,7 @@ def _execute_candidate(
                 "conda",
                 "run",
                 "-n",
-                "llm-autocompress-quant",
+                SITE_CONFIG.quant_env,
                 "python",
                 str(SKILL_ROOT / "scripts" / "quant_worker.py"),
                 "--method",

@@ -17,6 +17,21 @@ runtime = [
   "safetensors>=0.4",
   "transformers>=4.56,<5",
 ]
+serve = [
+  "vllm==0.13.0",
+]
+pruning = [
+  "accelerate>=0.33,<2",
+  "lm-eval>=0.4.4,<0.5",
+  "loguru>=0.7,<1",
+  "numpy>=1.26,<3",
+  "scikit-learn>=1.5,<2",
+  "tabulate>=0.9,<1",
+  "toml>=0.10,<1",
+  "tqdm>=4.66,<5",
+  "timm>=1.0,<2",
+  "torchvision>=0.19",
+]
 quant = [
   "compressed-tensors==0.12.2",
   "llmcompressor==0.8.1",

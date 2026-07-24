@@ -1,0 +1,23 @@
+model: ../cache/llm_weights/deit-base-patch16-224                                  # model load path
+#local_data_path: ../wanda/data/c4
+root_data_path: ../cache/data/ImageNet
+
+data_cache_dir: ./cache
+
+device: cuda:0
+seed: 0                       # (int) number of random seed for {torch, numpy}
+nsamples: 4096              # batch_size,128*4=512, 128*3
+sparsity_ratio: 0.5
+#prune_m: 0
+#prune_n: 0
+sparsity_type: unstructured
+prune_method: d2prune           # d2prune, sparsegpt
+cache_dir: llm_weights        # (str, optional) path to cache dir
+cali_dataset: ImageNet
+#eval_dataset: ImageNet
+output_dir: out/deit-base-patch16-224-d2prune-sp0.5
+save_model:
+s: 1500
+blocksize: 128
+r1: 1
+r2: 0

@@ -253,8 +253,11 @@ def assess(
             reasons.append(f"python module {module} is missing")
     if capability.required_repo:
         repo = env.get("repos", {}).get(capability.required_repo, {})
-        if not repo.get("exists"):
-            reasons.append(f"local repo {capability.required_repo} is missing")
+        if not repo.get("markers_valid", repo.get("exists")):
+            reasons.append(
+                f"local repo {capability.required_repo} is missing or incomplete "
+                f"at {repo.get('path', '<unconfigured>')}"
+            )
     if capability.backend == "samoyeds":
         extension = env.get("extensions", {}).get("samoyeds", {})
         if not extension.get("available"):

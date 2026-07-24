@@ -1,17 +1,17 @@
 name: opt-125m-awq-sq-validation
 model:
-  path: /data/xl/Projects/cache/llm_weights/opt-125m
+  path: ${MODEL_ROOT}/opt-125m
   family: opt
   kind: dense
 methods: [awq_w4a16, smoothquant_w8a8]
 backends: [vllm]
 calibration:
-  dataset: /data/xl/Projects/cache/data/c4
+  dataset: ${DATA_ROOT}/c4
   samples: 8
   sequence_length: 128
   seed: 43
 evaluation:
-  dataset: /data/xl/Projects/cache/data/wikitext/wikitext-2-raw-v1
+  dataset: ${DATA_ROOT}/wikitext/wikitext-2-raw-v1
   max_tokens_smoke: 512
   generation_prompts: [The future of efficient language model inference is]
 workload:
@@ -25,4 +25,4 @@ execution:
   device: cuda:0
   offline: true
   timeout_seconds: 1800
-output_dir: /data/xl/Projects/Samoyeds/llm-autocompress-accelerator/runs
+output_dir: ${RUN_ROOT}
