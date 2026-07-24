@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-autocompress-accelerator"
+version = "0.1.0"
+description = "Capability-aware LLM and MoE compression, inference benchmarking, and reporting."
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+runtime = [
+  "datasets>=2.14,<3",
+  "safetensors>=0.4",
+  "transformers>=4.56,<5",
+]
+quant = [
+  "compressed-tensors==0.12.2",
+  "llmcompressor==0.8.1",
+  "transformers==4.56.2",
+]
+test = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+llm-autopilot = "llm_autocompress.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["llm_autocompress*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

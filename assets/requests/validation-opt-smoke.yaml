@@ -1,0 +1,25 @@
+name: opt-125m-validation
+model:
+  path: /data/xl/Projects/cache/llm_weights/opt-125m
+  family: opt
+  kind: dense
+methods: [wanda_2_4]
+backends: [transformers, cusparselt]
+calibration:
+  dataset: /data/xl/Projects/cache/data/c4
+  samples: 8
+  sequence_length: 128
+evaluation:
+  dataset: /data/xl/Projects/cache/data/wikitext/wikitext-2-raw-v1
+  max_tokens_smoke: 512
+workload:
+  profile: interactive
+  batch_sizes: [1]
+  input_lengths: [128]
+  output_lengths: [8]
+  warmup: 2
+  iterations: 3
+execution:
+  device: cuda:0
+  offline: true
+output_dir: /data/xl/Projects/Samoyeds/llm-autocompress-accelerator/runs

@@ -1,0 +1,4 @@
+interface:
+  display_name: "LLM AutoCompress Accelerator"
+  short_description: "自动选择大模型压缩方法、推理后端并生成真实测量报告"
+  default_prompt: "Use $llm-autocompress-accelerator to compress a local LLM or MoE checkpoint, benchmark compatible inference backends, and produce an honest acceleration report."

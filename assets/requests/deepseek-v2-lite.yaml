@@ -1,0 +1,40 @@
+name: deepseek-v2-lite-moe-autocompress
+model:
+  path: /data/xl/Projects/cache/llm_weights/DeepSeek-V2-Lite
+  family: deepseek
+  kind: moe
+  trust_remote_code: true
+methods: [rose_expert, rose_2_4, rose_unstructured, rose_channel]
+backends: [auto]
+calibration:
+  dataset: /data/xl/Projects/cache/data/c4
+  samples: 16
+  sequence_length: 512
+  seed: 42
+evaluation:
+  dataset: /data/xl/Projects/cache/data/wikitext/wikitext-2-raw-v1
+  max_tokens_smoke: 1024
+  max_tokens_full: 8192
+  generation_prompts: [Sparse mixture-of-experts models are useful because]
+constraints:
+  max_relative_ppl_increase: 0.05
+  min_same_backend_speedup: 1.0
+pruning:
+  sparsity_ratio: 0.5
+  expert_ratio: 0.25
+  channel_ratio: 0.25
+  only_moe: true
+  tune_router: true
+workload:
+  profile: interactive
+  batch_sizes: [1, 8]
+  input_lengths: [128, 512, 2048]
+  output_lengths: [32, 128]
+  warmup: 10
+  iterations: 30
+execution:
+  device: cuda:0
+  tensor_parallel_size: 1
+  offline: true
+  timeout_seconds: 7200
+output_dir: /data/xl/Projects/Samoyeds/llm-autocompress-accelerator/runs

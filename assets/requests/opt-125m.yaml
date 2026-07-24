@@ -1,0 +1,46 @@
+name: opt-125m-autocompress
+model:
+  path: /data/xl/Projects/cache/llm_weights/opt-125m
+  family: opt
+  kind: dense
+  trust_remote_code: false
+methods: [awq_w4a16, gptq_w4a16, wanda_2_4]
+backends: [auto]
+calibration:
+  dataset: /data/xl/Projects/cache/data/c4
+  samples: 128
+  sequence_length: 2048
+  seed: 42
+evaluation:
+  dataset: /data/xl/Projects/cache/data/wikitext/wikitext-2-raw-v1
+  max_tokens_smoke: 4096
+  max_tokens_full: 32768
+  generation_prompts: [The future of efficient language model inference is]
+constraints:
+  max_relative_ppl_increase: 0.20
+  min_same_backend_speedup: 1.0
+pruning:
+  sparsity_ratio: 0.5
+  expert_ratio: 0.25
+  channel_ratio: 0.25
+search:
+  enabled: true
+  quantization_first: true
+  target_checkpoint_ratio: 4.0
+  allow_pruning_fallback: true
+  combine_with_best_quant: true
+  pruning_granularity: "2:4"
+  max_trials: 3
+workload:
+  profile: interactive
+  batch_sizes: [1, 8]
+  input_lengths: [128, 512, 2048]
+  output_lengths: [32, 128]
+  warmup: 10
+  iterations: 30
+execution:
+  device: cuda:0
+  tensor_parallel_size: 1
+  offline: true
+  timeout_seconds: 7200
+output_dir: /data/xl/Projects/Samoyeds/llm-autocompress-accelerator/runs

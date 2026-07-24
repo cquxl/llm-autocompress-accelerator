@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM AutoCompress Workbench</title>
+  <link rel="stylesheet" href="/style.css?v=2">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">EDGELITE-STYLE PIPELINE</p>
+      <h1>LLM 自动压缩与推理加速</h1>
+      <p>业务要求 → 能力规划 → 真实转换 → 质量门槛 → Kernel / 端到端测速 → 报告</p>
+    </header>
+    <section class="panel">
+      <h2>新建任务</h2>
+      <div class="grid">
+        <label>本地模型
+          <select id="model">
+            <option value="opt-125m">OPT-125M</option>
+            <option value="deepseek-v2-lite">DeepSeek-V2-Lite MoE</option>
+          </select>
+        </label>
+        <label>工作负载
+          <select id="profile">
+            <option value="interactive">交互：TPOT 优先</option>
+            <option value="throughput">吞吐：tokens/s 优先</option>
+            <option value="prefill-heavy">长上下文：prefill 优先</option>
+          </select>
+        </label>
+        <label>自动化范围
+          <select id="preset">
+            <option value="auto-full">业务约束驱动自动搜索（默认，达标即停）</option>
+            <option value="auto-smoke">快速策略：AWQ 探测 → Wanda 回退</option>
+            <option value="quantization">量化诊断对比：GPTQ + AWQ + SmoothQuant</option>
+            <option value="pruning">剪枝诊断对比：Wanda + SparseGPT + D2Prune / ROSE</option>
+            <option value="dense">仅 Dense baseline（不压缩）</option>
+          </select>
+        </label>
+        <label>目标有效权重压缩倍率
+          <input id="targetRatio" type="number" min="1" step="0.1" value="4.0">
+        </label>
+        <label>最大 PPL 相对增幅
+          <select id="maxPplIncrease">
+            <option value="0.05">5%</option>
+            <option value="0.10">10%</option>
+            <option value="0.20" selected>20%（OPT-125M 演示）</option>
+            <option value="0.30">30%</option>
+          </select>
+        </label>
+        <label>最低同后端加速倍率
+          <input id="minSpeedup" type="number" min="0.1" step="0.05" value="1.00">
+        </label>
+        <label>剪枝回退粒度
+          <select id="pruningGranularity">
+            <option value="2:4">2:4 结构化稀疏</option>
+            <option value="unstructured">非结构化稀疏</option>
+            <option value="channel">通道剪枝</option>
+            <option value="expert">MoE 专家剪枝</option>
+          </select>
+        </label>
+      </div>
+      <label>业务要求
+        <textarea id="prompt">有效权重压缩至少 4 倍，PPL 增幅不超过 20%，同后端吞吐不低于 Dense；先量化探测，满足后立即停止，否则进入 Wanda/SparseGPT/D2Prune/ROSE 剪枝回退。</textarea>
+      </label>
+      <div class="actions">
+        <button id="preview">预览策略</button>
+        <button id="run" class="primary">运行自动压缩 Demo</button>
+      </div>
+      <pre id="strategy">等待输入。</pre>
+    </section>
+    <section class="panel">
+      <div class="row"><h2>任务与产物</h2><button id="refresh">刷新</button></div>
+      <div id="jobs"></div>
+    </section>
+  </main>
+  <script src="/app.js?v=2"></script>
+</body>
+</html>
